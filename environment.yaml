@@ -1,7 +1,0 @@
-name: ReptileDB
-channels:
-  - defaults
-dependencies:
-  - nltk
-  - re
-  - pprint

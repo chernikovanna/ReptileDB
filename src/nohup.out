@@ -1,0 +1,6 @@
+0  of  10000
+Aruba
+Traceback (most recent call last):
+  File "/Users/anna/ReptileDB/src/spatial.py", line 35, in <module>
+    if country_dict[country].intersects(species_shape):
+AttributeError: 'list' object has no attribute 'intersects'

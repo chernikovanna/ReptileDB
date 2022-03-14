@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+
+<!-- Create an element where the map will take place -->
+<svg id="my_dataviz" width="1000" height="800"></svg>
+<div id="arrayStrContainer"></div>
+
+<svg id="tb" width="400" height = "800"></svg>
+<script>
+
+var svg = d3.select("#my_dataviz"),
+  width = +svg.attr("width"),
+  height = +svg.attr("height");
+var s;
+// Map and projection
+var path = d3.geoPath();
+var projection = d3.geoMercator()
+  .scale(150)
+  .center([0,20])
+  .translate([width / 2, height / 2]);
+// Data and color scale
+var data = d3.map();
+var cl = []
+var colorScale = d3.scaleSequential().domain([0,1003])
+.interpolator(d3.interpolateRgb("purple", "orange"));
+
+
+// Load external data and boot
+d3.queue()
+  .defer(d3.json, "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson")
+  .defer(d3.csv, "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world_population.csv",
+  function(d) {
+    data.set(d.code, +d.pop)})
+  .await(ready);
+
+
+async function fetchAllData (j) {
+  // await response of a fetch call
+  const response = await fetch(j);
+  // once the promise is resolved convert the response to an object
+  const data = await response.json();
+  // your data has been converted to an object now)
+  return data;
+}
+
+function ready(error, topo) {
+  var cl;
+  d3.json("countries.json", function(d){
+    cl = d
+    for (var i = 0; i < topo.features.length; i++){
+      topo.features[i].datum = cl[topo.features[i].properties.name]
+    }
+    console.log(topo.features);
+    svg.append("g")
+      .selectAll("path")
+      .data(topo.features)
+      .enter()
+      .append("path")
+      .attr("d", d3.geoPath().projection(projection))
+      .attr("fill", function (d) {
+        l = 0
+        if (d.datum != undefined){
+          l = d.datum.length
+        }
+        console.log(l)
+        return colorScale(l);
+      })
+      .on('mouseover',function(d){
+        s = d3.select("#tb")
+        t = ""
+        a = []
+        if (d.datum != undefined){
+          for(var i = 0; i < d.datum.length; i++){
+            t = d.datum[i]
+            a.push(t);
+            s.append("text").attr("x", 20).attr("y", (i + 1)*20);
+            s.text(t);
+          }
+        }
+        node = d3.selectAll('g node');
+        d3.select('#arrayStrContainer').text(JSON.stringify(a));
+      })
+      .on("mouseout", function(d){
+          s.remove();
+      });
+
+    });
+};
+var promises = [];
+
+//var files = []
+  //for (var i = 0; i < topo.features.length; i++){
+    //files.push("https://api.reptile-database.org/species?genus=" + g + "&species=" + s)
+    //files.push("https://api.reptile-database.org/search?distribution=" + topo.features[i].properties.name);
+  //}
+  //files.forEach(function(url) {
+  //    promises.push( fetchAllData(url))
+  //});
+
+  //Promise.all(promises).then(function(values) {
+      //for (var i = 0; i < values.length; i++){
+      //  topo.features[i].size = values[i].length
+      //  topo.features[i].datum = values[i]
+      //}
+      // Draw the map
+
+
+//}
+
+
+
+</script>

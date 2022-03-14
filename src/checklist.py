@@ -1,5 +1,6 @@
-#File paths
-FULL_DB_PATH = "../test/full_db/reptile_database_2021_11.txt"
+import requests
+
+
 COUNTRY_LIST = "../test/country_list"
 
 #read country list
@@ -11,21 +12,35 @@ f.close()
 for i in range(len(countries)):
     countries[i] = countries[i].split(",")[0]
 
-#Sparse Matrix
-mat = [None] * len(countries)
+#List
+mat = {}
 
-#read from reptile database
-with open(FULL_DB_PATH, encoding="utf_16") as f:
-    for line in f.readlines():
-        s = line.split("\t")
-        species_name = s[1] + " " + s[2]
-        for country in countries:
-            if country in line:
-                if mat[countries.index(country)] is not None:
-                    mat[countries.index(country)].append(species_name)
-                else:
-                    mat[countries.index(country)] = []
-                    mat[countries.index(country)].append(species_name)
+#species
+sp = []
+import urllib.request, json
+with urllib.request.urlopen("https://api.reptile-database.org/search") as url:
+    data = json.loads(url.read().decode())
+    for d in data:
+        g = d['genus']
+        s = d['species']
+        sp.append(d)
+        u = "https://api.reptile-database.org/species?genus=" + g + "&species=" + s
+        with urllib.request.urlopen(u) as url_inner:
+            entry = json.loads(url_inner.read().decode())
+            species_name = g + " " + s
+            line = entry['distribution']
+            for country in countries:
+                if country in line:
+                    if country in mat.keys():
+                        mat[country].append(species_name)
+                    else:
+                        mat[country] = []
+                        mat[country].append(species_name)
 
-country_name = input("What country?:")
-print(mat[countries.index(country_name)])
+out_f = open("species.json", "w")
+print(json.dumps(sp), file=out_f)
+out_f.close()
+
+out_f = open("countries.json", "w")
+print(json.dumps(mat), file=out_f)
+out_f.close()
