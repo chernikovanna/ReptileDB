@@ -24,6 +24,7 @@ with urllib.request.urlopen("https://api.reptile-database.org/search") as url:
     l = len(data)
     for d in data:
         print(i, " of ", l)
+        i += 1
         g = d['genus']
         s = d['species']
         u = "https://api.reptile-database.org/spatial?genus=" + g + "&species=" + s
