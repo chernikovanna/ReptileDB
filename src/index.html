@@ -12,11 +12,22 @@
 <div class="row align-items-center">
    <div class="col-sm-2"><p id="value-range"></p></div>
    <div class="col-sm"><div id="slider-range"></div></div>
+   <select id="selectButton"></select>
  </div>
+
+
 <!-- Create an element where the map will take place -->
 <!-- <svg id="my_dataviz" viewBox="0 0 800 1000"  height="800" width="1000"></svg>-->
-<svg id="my_dataviz" height="800" width="1000"></svg>
-<div id="halfpage"></div>
+  <div id="container">
+  <div id="worldmap">
+  <svg id="my_dataviz" ></svg>
+  </div>
+  <div id="halfpage">
+  <!--<svg id="sky"> </svg>-->
+  </div>
+  <div id="clear"></div>
+
+    </div>
 
 
 <div id="arrayStrContainerCountry"></div>
@@ -25,15 +36,55 @@
 
 <svg id="tb" width="400" height = "800"></svg>
 <style>
+/*.svg-content-responsive {
+  display: inline-block;
+  position: absolute;
+  top: 10px;
+  left: 0;
+}*/
+
+.col-sm{
+  display:inline-block;
+  width: 75%;
+}
+select#selectButton{
+  display:inline-block;
+  width: 20%;
+}
+#clear {
+    clear: both;
+}
+div#container {
+  margin: auto;
+}
+        div#worldmap{
+          float:left;
+          display: inline-block;
+          width: 75%
+
+        }
+
         div#halfpage{
-        height: 900px;
-        width: 800px;
+          float:left;
+          display:inline-block;
+        width: 24%;
         border:2px solid #000;
         overflow-y: auto;
+        height: 500px;
         }
+        /*svg#my_dataviz{
+          display: inline-block;
+          position: relative;
+          width: 100%;
+          height: 1000px
+          padding-bottom: 2%;
+          vertical-align: top;
+          overflow: hidden;
+        }*/
+
         svg#sky {
-          height: 1000px;
-          width: 1100px;
+          /*height: 1000px;*/
+          width: 100%;
           border:1px dotted #ccc;
           background-color: #ccc;
        }
@@ -42,7 +93,10 @@
 var years = [];
 var pops = [];
 
-var svg = d3.select("#my_dataviz"),
+var svg = d3.select("#my_dataviz")
+ .attr("preserveAspectRatio", "xMinYMin meet")
+ .attr("viewBox", "0 0 1000 800")
+ .classed("svg-content-responsive", true),
   width = +svg.attr("width"),
   height = +svg.attr("height");
 
@@ -53,7 +107,7 @@ var path = d3.geoPath();
 var projection = d3.geoMercator()
   .scale(150)
   .center([0,0])
-  .translate([width / 2, height / 2]);
+  .translate([1000 / 2, 800 / 2]);
 
 // Data and color scale
 var data = d3.map();
@@ -86,7 +140,10 @@ function ready(error, topo) {
   var cl;
   d3.json("species.json", function(dd){
     sp = dd;
-    console.log(dd)
+
+
+
+
     d3.json("countries.json", function(d){
       // data stuff
       cl = d;
@@ -103,10 +160,28 @@ function ready(error, topo) {
         }
       }
 
+      //filter by taxa
+      myList = [];
+      for (var key in dd){
+        myList.push.apply(myList, dd[key].taxa.split(/[,;]+/))
+      }
+      const unique = [...new Set(myList)];
+      d3.select("#selectButton")
+        .selectAll('myOptions')
+       	.data(unique)
+        .enter()
+      	.append('option')
+        .text(function (d) { return d; }) // text showed in the menu
+        .attr("value", function (d) { return d; })
+        d3.select("#selectButton").on("change", function(d) {
+          // recover the option that has been chosen
+          var selectedOption = d3.select(this).property("value")
+          // run the updateChart function with this selected option
+          update(topo, taxFilter, selectedOption)
+      }) // correspond
 
 
       //slider bar
-      console.log(years)
       var sliderRange = d3
     .sliderBottom()
     .min(d3.min(years))
@@ -114,7 +189,7 @@ function ready(error, topo) {
     .width(300)
     .tickFormat(d3.format('4.0f'))
     .ticks(10)
-    .default([0.015, 0.02])
+    .default([d3.min(years), d3.max(years)])
     .fill('#2196f3')
     .on('onchange', val => {
       d3.select('p#value-range').text(val.map(d3.format('4.0f')).join('-'));
@@ -140,7 +215,7 @@ function ready(error, topo) {
   );
 
 
-      update(topo, null);
+      update(topo, null, null);
 
     });
   });
@@ -160,6 +235,20 @@ function yearFilter(input_data, value){
   }
 }
 
+function taxFilter(input_data, value){
+  ret = []
+
+  if (input_data == undefined){
+    return input_data
+  }else {
+    for (var i = 0; i < input_data.length; i++){
+      if (input_data[i].attr.taxa.includes(value)){
+        ret.push(input_data[i])
+      }
+    }
+  return ret;
+}
+}
 function update(topo, func, value){
 
   let topo2 = JSON.parse(JSON.stringify(topo));
@@ -177,6 +266,15 @@ function update(topo, func, value){
         sizes.push(0)
       }
     }
+  } else{
+    for (var i = 0; i < topo.features.length; i++){
+      if (topo2.features[i].datum != undefined){
+        sizes.push(topo2.features[i].datum.length)
+      } else{
+        sizes.push(0)
+      }
+    }
+
   }
 
     var colorScale = d3.scaleSequential().domain([d3.min(sizes),d3.max(sizes)])
@@ -190,13 +288,11 @@ function update(topo, func, value){
   .append("path")
   .attr("d", d3.geoPath().projection(projection))
   .attr("fill", function (d) {
-
-    l = 0
+    l = "#808080"
     if (d.datum != undefined){
-        l = d.datum.length
+        l = colorScale(d.datum.length);
     }
-
-    return colorScale(l);
+    return l;
   })
   .on('click',function(d){
     s = d3.select("#tb")
@@ -210,31 +306,33 @@ function update(topo, func, value){
         s.text(t);
       }
     }
-    node = d3.selectAll('g node');
+    //node = d3.selectAll('g node');
     updateList(d.datum)
-    d3.select('#arrayStrContainer').text(JSON.stringify(a));
-    d3.select('#arrayStrContainerCountry').text(JSON.stringify(d.properties.name))
+    //d3.select('#arrayStrContainer').text(JSON.stringify(a));
+    //d3.select('#arrayStrContainerCountry').text(JSON.stringify(d.properties.name))
   });
 }
 
 function updateList(list){
   //species Bar
-  var container = d3.select("#halfpage")
+  //var container = d3.select("#halfpage")
 
-    var svgContainer = container.append('svg')
-        //.attr('height', 100)
-        //.attr('width', 100)
+  d3.select("#sky").remove();
+    var svgContainer = d3.select("#halfpage").append('svg')
+        .attr('height', list.length * 60)
+        .attr('width', 300)
         .attr('id', 'sky');
+        console.log(svgContainer.attr("width"))
 
     svgContainer.selectAll("g")//.append("rects1")
                 .data(list)
                 .enter()
                 .append("rect")
-                .attr("width", 400)
-                .attr("height", 50)
+                .attr("width", 250)
+                .attr("height", 30)
                 .attr("x", 12)
                 .attr("y", function(d, i){
-                    return 100 * i;
+                    return 50 * i;
                 })
                 .style("fill", "white")
 
@@ -242,14 +340,14 @@ function updateList(list){
                 .data(list)
                 .enter()
                 .append("text")
-                    .attr("x", function(d) { return 100 })
+                    .attr("x", function(d) { return 15 })
                     .attr("y", function(d, i){
-                        return 100 * i + 20;
+                        return 50 * i + 20;
                     })
                     .attr("dy", ".35em")
                     .text(function(d) { console.log(d);return d.name; })
                     .style('fill', 'Black')
-                    .style('font-size',"25");
+                    .style('font-size',"20");
 
 }
 var promises = [];
