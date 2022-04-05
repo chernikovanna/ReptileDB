@@ -13,7 +13,7 @@ shapefiles = json.loads(requests.get(p).text)
 country_dict = {}
 for shapes in shapefiles["features"]:
     shp  = shapes["geometry"]
-    country_dict[shapes["properties"]["ADMIN"]] = shape(shp)
+    country_dict[shapes["properties"]["ADMIN"]] = shp
 
 out_f = open("country_shapes.json", "w")
 print(json.dumps(country_dict), file=out_f)
