@@ -12,7 +12,9 @@
 <div class="row align-items-center">
    <div class="col-sm-2"><p id="value-range"></p></div>
    <div class="col-sm"><div id="slider-range"></div></div>
+   <div class="col-leg" id="legend"></div>
    <select id="selectButton"></select>
+   <img src="download.jpeg" width="50" height="50" id="download">
  </div>
 
 
@@ -45,7 +47,11 @@
 
 .col-sm{
   display:inline-block;
-  width: 75%;
+  width: 55%;
+}
+.col-leg{
+  display:inline-block;
+  width: 20%;
 }
 select#selectButton{
   display:inline-block;
@@ -92,7 +98,7 @@ div#container {
 <script>
 var years = [];
 var pops = [];
-
+var country_name =""
 var svg = d3.select("#my_dataviz")
  .attr("preserveAspectRatio", "xMinYMin meet")
  .attr("viewBox", "0 0 1000 800")
@@ -114,6 +120,12 @@ var data = d3.map();
 var cl = []
 var sp = {}
 
+//filters
+var year_range = [];
+var tax_filter = "Everything";
+var filters = [yearFilter,taxFilter]
+
+var textFile;
 
 d3.json("species.json", function(d){
   sp = d;
@@ -160,12 +172,16 @@ function ready(error, topo) {
         }
       }
 
+      year_range = [Math.floor(d3.min(years)), Math.floor(d3.max(years))]
       //filter by taxa
       myList = [];
       for (var key in dd){
-        myList.push.apply(myList, dd[key].taxa.split(/[,;]+/))
+        myList.push.apply(myList, dd[key].taxa.replace(/ *\([^)]*\) */g, "").split(/[,;]+/));
       }
       const unique = [...new Set(myList)];
+      unique.splice(unique.indexOf(""),1)
+      unique.sort()
+      unique.unshift("Everything")
       d3.select("#selectButton")
         .selectAll('myOptions')
        	.data(unique)
@@ -177,7 +193,8 @@ function ready(error, topo) {
           // recover the option that has been chosen
           var selectedOption = d3.select(this).property("value")
           // run the updateChart function with this selected option
-          update(topo, taxFilter, selectedOption)
+          tax_filter = selectedOption
+          update(topo, filters, [year_range, tax_filter]);
       }) // correspond
 
 
@@ -193,8 +210,8 @@ function ready(error, topo) {
     .fill('#2196f3')
     .on('onchange', val => {
       d3.select('p#value-range').text(val.map(d3.format('4.0f')).join('-'));
-      console.log(val)
-      update(topo, yearFilter,val)
+      year_range = [Math.floor(val[0]), Math.floor(val[1])]
+      update(topo, filters, [year_range, tax_filter]);
     });
 
   var gRange = d3
@@ -215,7 +232,7 @@ function ready(error, topo) {
   );
 
 
-      update(topo, null, null);
+      update(topo, filters, [year_range, tax_filter]);
 
     });
   });
@@ -241,6 +258,9 @@ function taxFilter(input_data, value){
   if (input_data == undefined){
     return input_data
   }else {
+    if (value == "Everything"){
+      return input_data
+    }
     for (var i = 0; i < input_data.length; i++){
       if (input_data[i].attr.taxa.includes(value)){
         ret.push(input_data[i])
@@ -249,17 +269,20 @@ function taxFilter(input_data, value){
   return ret;
 }
 }
-function update(topo, func, value){
+function update(topo, funcs, value){
 
   let topo2 = JSON.parse(JSON.stringify(topo));
 
 
   var sizes = [];
   //update data
-  if (func != null){
+  if (funcs != null){
     for (var i = 0; i < topo.features.length; i++){
-
-      topo2.features[i].datum = func(topo.features[i].datum, value)
+      var piece = topo.features[i].datum
+      for(var j = 0; j < funcs.length; j++){
+        piece = funcs[j](piece, value[j])
+      }
+      topo2.features[i].datum = piece
       if (topo2.features[i].datum != undefined){
         sizes.push(topo2.features[i].datum.length)
       } else{
@@ -277,8 +300,53 @@ function update(topo, func, value){
 
   }
 
-    var colorScale = d3.scaleSequential().domain([d3.min(sizes),d3.max(sizes)])
+    var max = d3.max(sizes)
+    var min = d3.min(sizes)
+    var colorScale = d3.scaleSequential().domain([min,max])
     .interpolator(d3.interpolateRgb("purple", "orange"));
+
+    //legenddd
+          d3.select("#legend_svg").remove();
+    var leg = d3.select("#legend")
+      .append("svg")
+      .attr("width",500)
+      .attr("height",150)
+      .attr("id", "legend_svg");
+
+    var rects = leg.selectAll("rect")
+      .data(d3.range(min, max, Math.floor((max - min) / 5)))
+      .enter()
+      .append("rect")
+      .attr("width",15)
+      .attr("height", 15)
+      .attr("y", function(d,i) { return i * 20;})
+      .attr("x", function(d,i) { return 15;})
+      .attr("fill", function(d) { return colorScale(d); })
+
+      leg.selectAll("text")
+      .data(d3.range(min, max, Math.floor((max - min) / 5)))
+      .enter()
+      .append("text")
+      .attr("y", function(d,i){return (i * 25) - 10;})
+      .attr("x", function(d,i) { return 40;})
+      .text(function(d) { return d; })
+
+      //
+      d3.select("#download")
+      .on("click", function(d){
+        var link = document.createElement('a');
+        var file_name = country_name + "_" + tax_filter + "_" + year_range[0] + "-" + year_range[1] + ".txt"
+        link.setAttribute('download', file_name);
+        link.href = textFile;
+        document.body.appendChild(link);
+
+        // wait for the link to be added to the document
+window.requestAnimationFrame(function () {
+  var event = new MouseEvent('click');
+  link.dispatchEvent(event);
+  document.body.removeChild(link);
+});
+      })
 
   //draw map
   svg.append("g")
@@ -299,6 +367,7 @@ function update(topo, func, value){
     t = ""
     a = []
     if (d.datum != undefined){
+      country_name = d.properties.name
       for(var i = 0; i < d.datum.length; i++){
         t = d.datum[i].name
         a.push(t);
@@ -306,10 +375,13 @@ function update(topo, func, value){
         s.text(t);
       }
     }
-    //node = d3.selectAll('g node');
+    var data = new Blob([a], {type: 'text/plain'});
+    if (textFile !== null) {
+      window.URL.revokeObjectURL(textFile);
+    }
+    textFile = window.URL.createObjectURL(data);
+
     updateList(d.datum)
-    //d3.select('#arrayStrContainer').text(JSON.stringify(a));
-    //d3.select('#arrayStrContainerCountry').text(JSON.stringify(d.properties.name))
   });
 }
 
@@ -322,9 +394,10 @@ function updateList(list){
         .attr('height', list.length * 60)
         .attr('width', 300)
         .attr('id', 'sky');
-        console.log(svgContainer.attr("width"))
 
-    svgContainer.selectAll("g")//.append("rects1")
+
+        //list
+    svgContainer.selectAll("g")
                 .data(list)
                 .enter()
                 .append("rect")
@@ -345,7 +418,7 @@ function updateList(list){
                         return 50 * i + 20;
                     })
                     .attr("dy", ".35em")
-                    .text(function(d) { console.log(d);return d.name; })
+                    .text(function(d) { return d.name; })
                     .style('fill', 'Black')
                     .style('font-size',"20");
 
