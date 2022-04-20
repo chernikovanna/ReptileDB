@@ -10,6 +10,7 @@ class Log():
         with open( self.logfile, "a" ) as f:
             f.write( message )
             f.close()
+        print(message, end="")
 
     @staticmethod
     def time_spent(start):

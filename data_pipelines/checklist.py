@@ -2,17 +2,21 @@ import requests
 import json
 import urllib.request
 import sqlite3 as sl
+from datapackage import Package
 import logs
 import aio
+from shapely.geometry import shape
+
+
 
 QUERY_SPECIES = "https://api.reptile-database.org/species?genus=%s&species=%s"
-ALL_SPECIES = "https://api.reptile-database.org/search"
+ALL_SPECIES_SEARCH = "https://api.reptile-database.org/search"
 
 SQL_INSERT_SPECIESCOUNTRIES = 'INSERT INTO SPECIESCOUNTRIES (SpeciesName, CountriesName, Coverage) values(?, ?, ?)'
 SQL_INSERT_SPECIES = 'INSERT INTO SPECIES (name, year, taxa) values(?, ?, ?)'
 SQL_INSERT_COUNTRIES = 'INSERT INTO COUNTRIES (code, name) values(?, ?)'
 
-def create_tables(log):
+def create_tables():
         con = sl.connect('reptile.db')
         log.print_message(" Creating Tables in reptile.db")
         with con:
@@ -49,6 +53,7 @@ def create_tables(log):
 def get_countries(specie, description):
     con = sl.connect('reptile.db')
     data = con.execute("SELECT * FROM COUNTRIES")
+    global all_matches
     all_matches = []
     for d in data:
         if d[1] in description:
@@ -57,7 +62,7 @@ def get_countries(specie, description):
     with con:
         con.executemany(SQL_INSERT_SPECIESCOUNTRIES, all_matches)
 
-def load_countries(log):
+def load_countries():
     #Create countries TABLE
     log.print_message(" Loading Countries ")
     with open("../data/countries.csv") as f :
@@ -75,13 +80,15 @@ def load_countries(log):
             con.close()
     log.print_message(" Loading Countries Completed. ")
 
-#Create species table
-def load_species(log):
+#Create species tabe
+def load_species():
+    global url_list
     url_list = []
     log.print_message(" Loading Species ")
-    with urllib.request.urlopen(ALL_SPECIES) as search:
+    with urllib.request.urlopen(ALL_SPECIES_SEARCH) as search:
         data = json.loads(search.read().decode())
         con = sl.connect('reptile.db')
+        global all_species
         all_species = []
         for d in data:
             genus = d['genus']
@@ -101,20 +108,61 @@ def load_species(log):
         a = aio.Aio(url_list)
         entry_list = a.run()
         log.print_message(" Requesting Entries Completed.")
-        for i in range(len(entry_list)):
-            log.print_message(" Checking Species %d of %d" % (i + 1, len(entry_list)))
-            entry = json.loads(entry_list[i])
+        for i, key in enumerate(entry_list):
+            entry = json.loads(entry_list[key])
             distribution = entry['distribution']
-            get_countries(all_species[i][0], distribution)
+            idx = url_list.index(key)
+            get_countries(all_species[idx][0], distribution)
+
+def load_spatial():
+    log.print_message(" Loading GeoJSON Countries ")
 
 
+    shapefiles = json.loads(open('../static/world.geojson').read())
 
+    country_dict = {}
+    for shapes in shapefiles["features"]:
+        shp  = shapes["geometry"]
+        country_dict[shapes["id"]] = shape(shp)
+    log.print_message(" Loading GeoJSON Countries Completed.")
+
+    log.print_message(" Loading GeoJSON Species ")
+    url_list_spatial = []
+    for url in url_list:
+        url_list_spatial.append(url.replace("species?","spatial?"))
+    a = aio.Aio(url_list_spatial)
+    spatial_list = a.run()
+    log.print_message(" Loading GeoJSON Species Completed. ")
+
+    print(len(spatial_list))
+    for i, line in enumerate(url_list_spatial):
+        if spatial_list[line] != "":
+            line = json.loads(spatial_list[line])
+            species_shape = shape(line["geometry"])
+            for country in country_dict.keys():
+                c = country_dict[country]
+                if c.intersects(species_shape):
+                    a = c.intersection(species_shape)
+                    con = sl.connect('reptile.db')
+                    with con:
+                        if (all_species[i][0], country, 1) in all_matches:
+                            sql = """UPDATE SpeciesCountries
+                                    SET Coverage= %s
+                                    WHERE SpeciesName = %s AND CountriesName = %s"""
+                            con.execute(sql%(a.area,all_species[i][0],country))
+                        else:
+                            con.execute(SQL_INSERT_SPECIESCOUNTRIES, (all_species[i][0], country, a.area))
+
+
+    log.print_message(" Loading GeoJSON Species Completed. ")
 
 def main():
+    global log
     log = logs.Log("reptile.db.log")
-    create_tables(log)
-    load_countries(log)
-    load_species(log)
+    create_tables()
+    load_countries()
+    load_species()
+    load_spatial()
 
 if __name__ == '__main__':
     main()

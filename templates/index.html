@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <meta charset="utf-8">
 
@@ -126,15 +127,12 @@ var filters = [yearFilter,taxFilter]
 
 var textFile;
 
-d3.json("/data/species/", function(d){
+d3.json("/data/species", function(d){
   sp = d;
 });
 // Load external data and boot
 d3.queue()
   .defer(d3.json, "/data/world")
-  .defer(d3.csv, "/static/world_population.csv",
-  function(d) {
-    data.set(d.code, +d.pop)})
   .await(ready);
 
 
@@ -150,7 +148,7 @@ function ready(error, topo) {
       // data stuff
       cl = d;
       for (var i = 0; i < topo.features.length; i++){
-        topo.features[i].datum = cl[topo.features[i].properties.name]
+        topo.features[i].datum = cl[topo.features[i].id.toLowerCase()]
         if (topo.features[i].datum != undefined){
           for (var j = 0; j < topo.features[i].datum.length; j++){
             var species_name = topo.features[i].datum[j][0]
