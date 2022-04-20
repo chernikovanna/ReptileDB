@@ -17,10 +17,15 @@ def species():
 
 @blueprint.route('/data/countries', methods=['GET'])
 def countries():
-    data = None
-    with open("static/countries_corrected.json") as url:
-        data = json.load(url)
-    return data
+    con = sl.connect('data_pipelines/reptile.db')
+    with con:
+        countries_out = {}
+        country_list = con.execute('SELECT CODE FROM COUNTRIES')
+        for country in country_list:
+            species = con.execute('SELECT SPECIESNAME, COVERAGE FROM SPECIESCOUNTRIES WHERE COUNTRIESNAME=\'%s\''%(country[0]))
+            countries_out[country[0]] = [s for s in species]
+        return jsonify(countries_out)
+
 
 @blueprint.route('/data/world', methods=['GET'])
 def world():
