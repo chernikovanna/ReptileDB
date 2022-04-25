@@ -3,15 +3,20 @@ import {
   handleMouseOut,
   handleMouseMove,
 } from "../helpers/handleTooltip";
+import { useCountryData } from "../hooks/useCountryData";
+import * as d3 from "d3";
+
+
 
 export default function Country(props) {
   const { path, tooltipData } = props;
+  const color = props.code
 
-  //each path defines the shape of a region in the map
   return (
     <path
       className="path"
       d={path}
+      fill={color}
       onMouseOver={() => {
         handleMouseOver(tooltipData);
       }}
