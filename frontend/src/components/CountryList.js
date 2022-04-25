@@ -27,10 +27,12 @@ export default function CountryList(props) {
       }
       return (
         <Country
-          key={data.properties.FID}
+          key={data.id}
           path={path(data)}
           tooltipData={region_name}
           code={fill}
+          data = {country_data_list}
+          species_list = {props.species_list}
         />
       );
     });

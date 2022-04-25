@@ -3,7 +3,6 @@ import {
   handleMouseOut,
   handleMouseMove,
 } from "../helpers/handleTooltip";
-import { useCountryData } from "../hooks/useCountryData";
 import * as d3 from "d3";
 
 
@@ -11,6 +10,7 @@ import * as d3 from "d3";
 export default function Country(props) {
   const { path, tooltipData } = props;
   const color = props.code
+  const setSpeciesList = props.species_list
 
   return (
     <path
@@ -24,6 +24,7 @@ export default function Country(props) {
       onMouseMove={(event) => {
         handleMouseMove(event);
       }}
+      onClick={() => {setSpeciesList(props.data);}}
     />
   );
 }
