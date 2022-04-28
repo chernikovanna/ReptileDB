@@ -6,6 +6,7 @@ export default function SpeciesList(props) {
 
   // render map only when map data is fully loaded
   if (!props.data.loading) {
+    console.log(props.data.data);
     const speciesBlocks = props.data.data.map((data, index) => {
       return (
         <Species
