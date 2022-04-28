@@ -48,9 +48,8 @@ def countries():
         lengths = []
         sums = []
         for country in country_list:
-            species = con.execute('SELECT SPECIESNAME, COVERAGE FROM SPECIESCOUNTRIES WHERE COUNTRIESNAME=\'%s\''%(country[0]))
+            species = con.execute('SELECT SPECIESNAME, COVERAGE FROM SPECIESCOUNTRIES WHERE COUNTRIESNAME=\'%s\''%(country[0])).fetchall()
             species_comprehension = [s for s in species]
-            print(species_comprehension)
             countries_out[country[0]] = species_comprehension
             lengths.append(len(species_comprehension))
             sums.append(sum([s[1] for s in species_comprehension]))
