@@ -7,12 +7,13 @@ import Country from "./Country";
 export default function CountryList(props) {
   // step 1: load geoJSON and create tooltip
   const {mapData} = useMapTools();
-  const {countryData} = useCountryData();
+  const {countryData} = useCountryData(props.select_type);
 
   // render map only when map data is fully loaded
   if (!mapData.loading && !countryData.loading) {
     // step 2: render the regions
     // compute a path function based on correct projections that we will use later
+    console.log(countryData.data.max)
     var colorScale = d3.scaleSequential().domain([countryData.data.min,countryData.data.max]).
     interpolator(d3.interpolateRgb("purple", "orange"));
     const path = d3.geoPath().projection(setMapProjection(mapData.data));
@@ -23,7 +24,12 @@ export default function CountryList(props) {
       const country_data_list = countryData.data.countries[data.id.toLowerCase()]
       var fill = "rgb(128, 128, 128)"
       if (country_data_list){
-        var fill = colorScale(country_data_list.length)
+        if(props.select_type == "Species Counts"){
+          fill = colorScale(country_data_list.length)
+        } else if(props.select_type == "Species Density"){
+          let densities = country_data_list.map((specie) => specie[1])
+          fill = colorScale(densities.reduce((partialSum, a) => partialSum + a, 0))
+        }
       }
       return (
         <Country
@@ -45,6 +51,6 @@ export default function CountryList(props) {
       </>
     );
   } else {
-    return <h1> loading </h1>;
+    return <h1> loading... </h1>;
   }
 }

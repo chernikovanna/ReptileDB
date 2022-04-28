@@ -27,6 +27,6 @@ export default function SpeciesList(props) {
 
 
   } else {
-    return <h1> Select a Country </h1>;
+    return <h2> Select a Country </h2>;
   }
 }

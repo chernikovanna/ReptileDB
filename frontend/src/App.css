@@ -54,28 +54,76 @@ select#selectButton{
 div#container {
   margin: auto;
 }
-        div#halfpage{
-          float:left;
-          display:inline-block;
-        width: 24%;
-        border:2px solid #000;
-        overflow-y: auto;
-        height: 500px;
-        }
+div#container_two {
+  margin: auto;
+}
 
-        div#worldmap{
-          float:left;
-          display:inline-block;
-        width: 75%;
-        border:2px solid #000;
-        overflow-y: auto;
-        overflow-x: auto;
-        height: 500px;
-        }
+div#options{
+  float:left;
+  display:inline-block;
+width: 18%;
+border:2px solid #000;
+overflow-y: auto;
+height: 100px;
+}
+
+div#slider{
+  float:left;
+  display:inline-block;
+width: 30%;
+border:2px solid #000;
+overflow-y: auto;
+height: 100px;
+}
+div#key{
+  float:left;
+  display:inline-block;
+width: 20%;
+border:2px solid #000;
+overflow-y: auto;
+height: 100px;
+}
+div#dropdown{
+  float:left;
+  display:inline-block;
+width: 24%;
+border:2px solid #000;
+overflow-y: auto;
+height: 100px;
+}
+div#download{
+  float:left;
+  display:inline-block;
+width: 5%;
+border:2px solid #000;
+overflow-y: auto;
+height: 100px;
+}
 
 
-        svg#sky {
-          width: 100%;
-          border:1px dotted #ccc;
-          background-color: #ccc;
-       }
+
+div#halfpage{
+  float:left;
+  display:inline-block;
+width: 24%;
+border:2px solid #000;
+overflow-y: auto;
+height: 500px;
+}
+
+div#worldmap{
+  float:left;
+  display:inline-block;
+width: 75%;
+border:2px solid #000;
+overflow-y: auto;
+overflow-x: auto;
+height: 500px;
+}
+
+
+svg#sky {
+  width: 100%;
+  border:1px dotted #ccc;
+  background-color: #ccc;
+}
