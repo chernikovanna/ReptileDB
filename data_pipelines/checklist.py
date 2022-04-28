@@ -110,9 +110,46 @@ def load_species():
         log.print_message(" Requesting Entries Completed.")
         for i, key in enumerate(entry_list):
             entry = json.loads(entry_list[key])
-            distribution = entry['distribution']
-            idx = url_list.index(key)
-            get_countries(all_species[idx][0], distribution)
+            if 'distribution' in entry.keys():
+                distribution = entry['distribution']
+                idx = url_list.index(key)
+                get_countries(all_species[idx][0], distribution)
+
+
+#Create species tabe using full_db
+def load_species_from_txt():
+    global url_list
+    url_list = []
+    log.print_message(" Loading Species ")
+    with open("../data/full_db/reptile_database_2021_11.txt", encoding="utf_16") as f:
+        con = sl.connect('reptile.db')
+        global all_species
+        all_species = []
+        for line in f.readlines():
+            d = line.split("\t")
+            genus = d[1]
+            species = d[2]
+            taxa = d[0]
+            year = d[4]
+            entry = (genus + " " + species, year, taxa)
+            all_species.append(entry)
+            url = QUERY_SPECIES % (genus,species)
+            url_list.append(url)
+        with con:
+            con.executemany(SQL_INSERT_SPECIES, all_species)
+        if con:
+            con.close()
+        log.print_message(" Loading Species Completed. ")
+        log.print_message(" Requesting Entries ")
+        a = aio.Aio(url_list)
+        entry_list = a.run()
+        log.print_message(" Requesting Entries Completed.")
+        for i, key in enumerate(entry_list):
+            entry = json.loads(entry_list[key])
+            if 'distribution' in entry.keys():
+                distribution = entry['distribution']
+                idx = url_list.index(key)
+                get_countries(all_species[idx][0], distribution)
 
 def load_spatial():
     log.print_message(" Loading GeoJSON Countries ")
@@ -138,20 +175,21 @@ def load_spatial():
     for i, line in enumerate(url_list_spatial):
         if spatial_list[line] != "":
             line = json.loads(spatial_list[line])
-            species_shape = shape(line["geometry"])
-            for country in country_dict.keys():
-                c = country_dict[country]
-                if c.intersects(species_shape):
-                    a = c.intersection(species_shape)
-                    con = sl.connect('reptile.db')
-                    with con:
-                        if (all_species[i][0], country, 1) in all_matches:
-                            sql = """UPDATE SpeciesCountries
-                                    SET Coverage= %s
-                                    WHERE SpeciesName = %s AND CountriesName = %s"""
-                            con.execute(sql%(a.area,all_species[i][0],country))
-                        else:
-                            con.execute(SQL_INSERT_SPECIESCOUNTRIES, (all_species[i][0], country, a.area))
+            if "geometry" in line.keys():
+                species_shape = shape(line["geometry"])
+                for country in country_dict.keys():
+                    c = country_dict[country]
+                    if c.intersects(species_shape):
+                        a = c.intersection(species_shape)
+                        con = sl.connect('reptile.db')
+                        with con:
+                            if (all_species[i][0], country, 1) in all_matches:
+                                sql = """UPDATE SpeciesCountries
+                                        SET Coverage= %s
+                                        WHERE SpeciesName = %s AND CountriesName = %s"""
+                                con.execute(sql%(a.area,all_species[i][0],country))
+                            else:
+                                con.execute(SQL_INSERT_SPECIESCOUNTRIES, (all_species[i][0], country, a.area))
 
 
     log.print_message(" Loading GeoJSON Species Completed. ")
@@ -161,7 +199,8 @@ def main():
     log = logs.Log("reptile.db.log")
     create_tables()
     load_countries()
-    load_species()
+    # load_species()
+    load_species_from_txt()
     load_spatial()
 
 if __name__ == '__main__':
