@@ -13,6 +13,7 @@ export default function CountryList(props) {
 
   // render map only when map data is fully loaded
   if (!mapData.loading && !countryData.loading) {
+    console.log(countryData)
     // step 2: render the regions
     // compute a path function based on correct projections that we will use later
     var colorScale = d3.scaleSequential().domain([countryData.data.min,countryData.data.max]).
@@ -24,10 +25,11 @@ export default function CountryList(props) {
     const healthRegions = mapData.data.features.map((data) => {
       const region_name = data.properties.name;
       const country_data_list = countryData.data.countries[data.id]
-      
+
+      console.log(countryData.data.countries[data.id])
       if (country_data_list){
         console.log(props.select_type)
-        if(props.select_type == "Species Counts"){
+        if(props.select_type == "Species Counts" || props.select_type == "Endemic Species"){
           fill = colorScale(country_data_list.length)
         } else if(props.select_type == "Species Density"){
           let densities = country_data_list.map((specie) => specie[1])
