@@ -25,7 +25,7 @@ def get_endemic_species():
         data = {}
         countries_out = {}
         for country in country_list:
-            countries_out = con.execute('SELECT SpeciesName, Coverage FROM (SELECT * FROM SpeciesCountries GROUP BY SpeciesName HAVING COUNT(*) = 1) WHERE countriesname \'%s\''%(country[0]))
+            countries_out[country[0]] = con.execute('SELECT SpeciesName, Coverage FROM (SELECT * FROM SpeciesCountries GROUP BY SpeciesName HAVING COUNT(*) = 1) WHERE CountriesName =\'%s\''%(country[0].upper())).fetchall()
             lengths.append(len(countries_out[country[0]]))
         data["countries"] = countries_out
         data["min"] = min(lengths)
@@ -36,6 +36,7 @@ def get_endemic_species():
 @blueprint.route('/data/countries', methods=['GET'])
 def countries():
     c = request.args.get('type')
+    print(c)
     if c == 'Endemic Species':
         return get_endemic_species()
     con = sl.connect('data_pipelines/reptile.db')
@@ -44,15 +45,14 @@ def countries():
         data = {}
         countries_out = {}
         #get all countries and turn into list
-        country_list = con.execute('SELECT CODE FROM COUNTRIES')
+        country_list = con.execute('SELECT CODE FROM COUNTRIES').fetchall()
         lengths = []
         sums = []
         for country in country_list:
-            species = con.execute('SELECT SPECIESNAME, COVERAGE FROM SPECIESCOUNTRIES WHERE COUNTRIESNAME=\'%s\''%(country[0])).fetchall()
-            species_comprehension = [s for s in species]
-            countries_out[country[0]] = species_comprehension
-            lengths.append(len(species_comprehension))
-            sums.append(sum([s[1] for s in species_comprehension]))
+            species = con.execute('SELECT SPECIESNAME, COVERAGE FROM SPECIESCOUNTRIES WHERE COUNTRIESNAME=\'%s\''%(country[0].upper())).fetchall()
+            countries_out[country[0]] = species
+            lengths.append(len(species))
+            sums.append(sum([s[1] for s in species]))
 
         data["countries"] = countries_out
         if c == 'Species Counts':
@@ -77,6 +77,6 @@ def world():
 def country():
     c = request.args.get('name')
     con = sl.connect('data_pipelines/reptile.db')
-    species = con.execute('SELECT SPECIESNAME, COVERAGE FROM SPECIESCOUNTRIES WHERE COUNTRIESNAME=\'%s\''%(c))
-    species_out = [s for s in species]
+    species_out = con.execute('SELECT SPECIESNAME, COVERAGE FROM SPECIESCOUNTRIES WHERE COUNTRIESNAME=\'%s\''%(c)).fetchall()
+    print(species_out)
     return jsonify(species_out)
