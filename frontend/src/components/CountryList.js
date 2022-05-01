@@ -3,6 +3,7 @@ import { setMapProjection } from "../helpers/setMapProjection";
 import { useMapTools } from "../hooks/useMapTools";
 import { useCountryData } from "../hooks/useCountryData";
 import { useState, useEffect } from "react";
+import { SpinnerRound } from 'spinners-react';
 import Country from "./Country";
 
 export default function CountryList(props) {
@@ -56,6 +57,6 @@ export default function CountryList(props) {
       </>
     );
   } else {
-    return <h1> loading... </h1>;
+    return <SpinnerRound />;
   }
 }
