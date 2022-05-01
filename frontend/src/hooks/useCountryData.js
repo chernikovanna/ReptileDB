@@ -1,27 +1,28 @@
-import * as d3 from "d3";
-import { useState, useEffect } from "react";
-import React from "react"
+import * as d3 from 'd3';
+import { useState, useEffect } from 'react';
 
-export const useCountryData = function (type) {
+const COUNTRY_DATA_ENDPOINT = 'http://localhost:5000/data/countries';
+
+const useCountryData = (type) => {
   // store loaded map data in a state
-  const [countryData, setCountryData] = useState({
-    data: {},
-    loading: true,
-  });
+  const [countryData, setCountryData] = useState();
+  const [isCountryDataLoading, setIsCountryDataLoading] = useState(true);
 
   // only fetch map data once and create a tooltip
   useEffect(() => {
-    d3.json("http://localhost:5000/data/countries?type=" + type)
+    setIsCountryDataLoading(true);
+
+    d3.json(`${COUNTRY_DATA_ENDPOINT}?type=${type}`)
       .then((data) => {
-        setCountryData((prevState) => {
-          return { ...prevState, data: data, loading: false };
-        });
+        setCountryData(data);
+        setIsCountryDataLoading(false);
       })
       .catch((err) => {
-        console.log("error occurred with loading map", err);
+        console.log('error occurred with loading map', err);
       });
-
   }, [type]);
 
-  return { countryData };
+  return { countryData, isCountryDataLoading };
 };
+
+export default useCountryData;

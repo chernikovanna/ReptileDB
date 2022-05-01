@@ -52,9 +52,9 @@ select#selectButton{
   display:inline-block;
   width: 20%;
 }
-#clear {
+/* #clear {
     clear: both;
-}
+} */
 
 
 .controls-container, .main-container {
@@ -74,6 +74,22 @@ select#selectButton{
   margin: 1rem 0;
   padding: 1em 1em;
   border: 1px solid rgba(34,36,38,.15);
+}
+
+.map-container {
+  display: inline-block;
+	position: relative;
+	width: 100%;
+	padding-bottom: 50%; 
+	vertical-align: middle; 
+	overflow: hidden; 
+}
+
+.map-canvas {
+  display: inline-block;
+	position: absolute;
+	top: 0;
+	left: 0;
 }
 
 div#controls {
@@ -130,8 +146,8 @@ div#halfpage{
   /* display:inline-block; */
 /* width: 24%; */
 /* border:2px solid #000; */
-overflow-y: auto;
-height: 500px;
+/* overflow-y: auto; */
+/* height: 500px; */
 }
 
 div#worldmap{
