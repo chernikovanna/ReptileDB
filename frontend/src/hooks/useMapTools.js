@@ -1,32 +1,33 @@
-import * as d3 from "d3";
-import { useState, useEffect } from "react";
+import * as d3 from 'd3';
+import { useState, useEffect } from 'react';
 
-export const useMapTools = function () {
+const useMapTools = () => {
   // store loaded map data in a state
-  const [mapData, setMapData] = useState({
-    data: {},
-    loading: true,
-  });
+  const [mapData, setMapData] = useState();
+  const [isMapDataLoading, setIsMapDataLoading] = useState(true);
 
   // only fetch map data once and create a tooltip
   useEffect(() => {
-    d3.json("http://localhost:5000/data/world")
+    setIsMapDataLoading(true);
+
+    d3.json('http://localhost:5000/data/world')
       .then((data) => {
-        setMapData((prevState) => {
-          return { ...prevState, data: data, loading: false };
-        });
+        setMapData(data);
+        setIsMapDataLoading(false);
       })
       .catch((err) => {
-        console.log("error occurred with loading map", err);
+        console.log('error occurred with loading map', err);
       });
 
     /// tooltip creation
-    d3.select("body")
-      .append("div")
-      .attr("id", "tooltip")
-      .attr("style", "position: absolute; opacity: 0");
+    d3.select('body')
+      .append('div')
+      .attr('id', 'tooltip')
+      .attr('style', 'position: absolute; opacity: 0');
     ///
   }, []);
 
-  return { mapData };
+  return { mapData, isMapDataLoading };
 };
+
+export default useMapTools;
