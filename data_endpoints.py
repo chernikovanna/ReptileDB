@@ -80,3 +80,12 @@ def country():
     species_out = con.execute('SELECT SPECIESNAME, COVERAGE FROM SPECIESCOUNTRIES WHERE COUNTRIESNAME=\'%s\''%(c)).fetchall()
     print(species_out)
     return jsonify(species_out)
+
+@blueprint.route('/data/year', methods=['GET'])
+def years():
+    data = {}
+    con = sl.connect('data_pipelines/reptile.db')
+    years = con.execute('SELECT year FROM SPECIES').fetchall()
+    data["min"] = min(years)
+    data["max"] = max(years)
+    return jsonify(data)

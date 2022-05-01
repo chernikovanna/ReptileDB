@@ -6,6 +6,7 @@ import useMapTools from '../hooks/useMapTools';
 import useCountryData from '../hooks/useCountryData';
 import Country from './Country';
 
+
 export default function CountryList(props) {
   const { select_type: selectType, species_list: speciesList } = props;
   // step 1: load geoJSON and create tooltip

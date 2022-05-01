@@ -1,12 +1,11 @@
 import './App.css';
 import React, { useState } from 'react';
-import { SpinnerRound } from 'spinners-react';
-
 import CountryList from './components/CountryList';
 import SpeciesList from './components/SpeciesList';
 import Options from './components/Options';
 import RangeSlider from './components/RangeSlider';
 import Select from './components/Select';
+import { useYears } from './hooks/useYears';
 
 function App() {
   // species list display
@@ -14,16 +13,20 @@ function App() {
     data: {},
     loading: true,
   });
-
-  const buttonCheckedStart = 'Species Counts';
-  const [type, setType] = useState(buttonCheckedStart);
-
   const setSpeciesList = (speciesList) => {
     setSpeciesData((prevState) => ({ ...prevState, data: speciesList, loading: false }));
   };
-
+  const buttonCheckedStart = 'Species Counts';
+  const [type, setType] = useState(buttonCheckedStart);
   const handleChange = (event) => {
     setType(event.target.value);
+  };
+
+  const initYears = useYears();
+  console.log(initYears)
+  const [years, setYears] = useState((initYears.data.min, initYears.data.max));
+  const handleChangeYears = (event) => {
+    setYears(event.target.value);
   };
 
   return (
@@ -37,7 +40,7 @@ function App() {
             <Options radio_change={handleChange} />
           </div>
           <div id="slider">
-            <RangeSlider min={0} max={100} onSliderChange={() => {}} />
+            <RangeSlider min={years.min} max={years.max} onSliderChange={handleChangeYears} />
           </div>
           <div id="key" />
           <div id="dropdown">
@@ -48,8 +51,7 @@ function App() {
       </div>
       <main className="main-container">
         <div id="worldmap" className="container">
-          {speciesData.loading ? <SpinnerRound />
-            : <CountryList species_list={setSpeciesList} select_type={type} />}
+          <CountryList species_list={setSpeciesList} select_type={type} />
         </div>
         <div id="halfpage" className="container">
           <SpeciesList data={speciesData} />
