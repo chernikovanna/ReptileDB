@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import CountryList from './components/CountryList';
 import SpeciesList from './components/SpeciesList';
 import Options from './components/Options';
-import RangeSlider from './components/RangeSlider';
+import YearSlider from './components/YearSlider';
 import Select from './components/Select';
-import { useYears } from './hooks/useYears';
+import Key from './components/Key';
 
 function App() {
   // species list display
@@ -16,18 +16,23 @@ function App() {
   const setSpeciesList = (speciesList) => {
     setSpeciesData((prevState) => ({ ...prevState, data: speciesList, loading: false }));
   };
+  // radio buttons
   const buttonCheckedStart = 'Species Counts';
   const [type, setType] = useState(buttonCheckedStart);
   const handleChange = (event) => {
     setType(event.target.value);
   };
 
-  const initYears = useYears();
-  console.log(initYears)
-  const [years, setYears] = useState((initYears.data.min, initYears.data.max));
+  //Years
+  const [years, setYears] = useState();
   const handleChangeYears = (event) => {
-    setYears(event.target.value);
+    setYears(event);
   };
+
+  const [taxa, setTaxa] = useState();
+  const handleChangeTaxa = (event) => {
+    setTaxa(event);
+  }
 
   return (
     <>
@@ -40,18 +45,21 @@ function App() {
             <Options radio_change={handleChange} />
           </div>
           <div id="slider">
-            <RangeSlider min={years.min} max={years.max} onSliderChange={handleChangeYears} />
+            <YearSlider range_change={handleChangeYears} />
           </div>
-          <div id="key" />
+          <div id="key">
+            <Key species_list={setSpeciesList} select_type={type} select_years={years} select_taxa={taxa} />
+          </div>
+
           <div id="dropdown">
-            <Select name="speciesSelect" options={[]} onSelect={() => {}} placeholder="Select a specie..." />
+            <Select taxa_change={handleChangeTaxa} />
           </div>
           <div id="download" />
         </div>
       </div>
       <main className="main-container">
         <div id="worldmap" className="container">
-          <CountryList species_list={setSpeciesList} select_type={type} />
+          <CountryList species_list={setSpeciesList} select_type={type} select_years={years} select_taxa={taxa} />
         </div>
         <div id="halfpage" className="container">
           <SpeciesList data={speciesData} />

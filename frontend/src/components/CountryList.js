@@ -8,10 +8,10 @@ import Country from './Country';
 
 
 export default function CountryList(props) {
-  const { select_type: selectType, species_list: speciesList } = props;
+  const { select_years: selectYears, select_type: selectType, species_list: speciesList, select_taxa: selectTaxa} = props;
   // step 1: load geoJSON and create tooltip
   const { mapData, isMapDataLoading } = useMapTools();
-  const { countryData, isCountryDataLoading } = useCountryData(selectType);
+  const { countryData, isCountryDataLoading } = useCountryData(selectType, selectYears, selectTaxa);
   const [mapHealthRegions, setMapHealthRegions] = useState();
 
   const generateMap = () => {

@@ -1,28 +1,30 @@
 import { useState, useEffect } from 'react';
 import * as d3 from 'd3';
 
-export const useYears = function () {
+export const useTaxa = function () {
   // store loaded map data in a state
-  const [yearData, setYearData] = useState({
+  const [taxaData, setTaxaData] = useState({
     data: {},
     loading: true,
   });
-
   // only fetch map data once and create a tooltip
   useEffect(() => {
-    d3.json("http://localhost:5000/data/year")
+    console.log("here")
+
+    d3.json("http://localhost:5000/data/taxas")
       .then((data) => {
-        setYearData((prevState) => {
+        console.log(data)
+        setTaxaData((prevState) => {
 
           return { ...prevState, data: data, loading: false };
 
         });
       })
       .catch((err) => {
-        console.log("error occurred with loading years", err);
+        console.log("error occurred with loading taxas", err);
       });
 
   }, []);
 
-  return  yearData ;
+  return  taxaData ;
 };

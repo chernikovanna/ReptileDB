@@ -1,17 +1,26 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { SelectPicker } from 'rsuite';
+import {useTaxa} from '../hooks/useTaxa';
+
 
 export default function Select(props) {
-  const { name, onSelect, options } = props;
-  return (
-    <select name={name} onChange={onSelect}>
-      {options.map((value) => <option value={value}>{value}</option>)}
-    </select>
-  );
-}
 
-Select.propTypes = {
-  name: PropTypes.string.isRequired,
-  onSelect: PropTypes.func.isRequired,
-  options: PropTypes.arrayOf(PropTypes.string).isRequired,
-};
+  const handleChange = props.taxa_change
+  const taxas = useTaxa();
+  if(!taxas.loading){
+    const data = taxas.data.map((taxa) => {
+      let t = {label: taxa, value: taxa};
+      return(t);
+
+    });
+    console.log(data)
+
+    return (
+      <SelectPicker
+      cleanable={(false)}
+      data={data}
+      defaultValue="All Taxas"
+      onChange ={handleChange}/>
+    );
+  }
+}
