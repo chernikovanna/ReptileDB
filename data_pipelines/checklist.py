@@ -15,7 +15,8 @@ ALL_SPECIES_SEARCH = "https://api.reptile-database.org/search"
 SQL_INSERT_SPECIESCOUNTRIES = 'INSERT INTO SPECIESCOUNTRIES (SpeciesName, CountriesName, Coverage) values(?, ?, ?)'
 SQL_INSERT_SPECIES = 'INSERT INTO SPECIES (name, year, taxa) values(?, ?, ?)'
 SQL_INSERT_COUNTRIES = 'INSERT INTO COUNTRIES (code, name) values(?, ?)'
-
+global all_matches
+all_matches = []
 def create_tables():
         con = sl.connect('reptile.db')
         log.print_message(" Creating Tables in reptile.db")
@@ -38,7 +39,7 @@ def create_tables():
                 (
                     SpeciesName TEXT NOT NULL,
                     CountriesName TEXT NOT NULL,
-                    Coverage FLOAT NOT NULL,
+                    Coverage REAL NOT NULL,
                     CONSTRAINT PK_SpeciesCountries PRIMARY KEY
                     (
                         SpeciesName,
@@ -53,14 +54,15 @@ def create_tables():
 def get_countries(specie, description):
     con = sl.connect('reptile.db')
     data = con.execute("SELECT * FROM COUNTRIES")
-    global all_matches
-    all_matches = []
+    local_matches = []
     for d in data:
+        country = d[0].upper()
         if d[1] in description:
-            datum = (specie, d[0], 1)
+            datum = (specie, country, 1)
+            local_matches.append(datum)
             all_matches.append(datum)
     with con:
-        con.executemany(SQL_INSERT_SPECIESCOUNTRIES, all_matches)
+        con.executemany(SQL_INSERT_SPECIESCOUNTRIES, local_matches)
 
 def load_countries():
     #Create countries TABLE
@@ -70,7 +72,7 @@ def load_countries():
         all_countries = []
         for line in f:
             line = line.strip().split(",")
-            code = line[2]
+            code = line[2].upper()
             name = line[3].replace("\"","")
             data = (code, name)
             all_countries.append(data)
@@ -171,13 +173,13 @@ def load_spatial():
     spatial_list = a.run()
     log.print_message(" Loading GeoJSON Species Completed. ")
 
-    print(len(spatial_list))
     for i, line in enumerate(url_list_spatial):
         if spatial_list[line] != "":
             line = json.loads(spatial_list[line])
             if "geometry" in line.keys():
                 species_shape = shape(line["geometry"])
                 for country in country_dict.keys():
+                    country = country.upper()
                     c = country_dict[country]
                     if c.intersects(species_shape):
                         a = c.intersection(species_shape)
@@ -185,11 +187,12 @@ def load_spatial():
                         with con:
                             if (all_species[i][0], country, 1) in all_matches:
                                 sql = """UPDATE SpeciesCountries
-                                        SET Coverage= %s
-                                        WHERE SpeciesName = %s AND CountriesName = %s"""
-                                con.execute(sql%(a.area,all_species[i][0],country))
+                                        SET Coverage= %f
+                                        WHERE SpeciesName = \'%s\' AND CountriesName = \'%s\'"""
+                                con.execute(sql%((a.area/c.area),all_species[i][0],country))
                             else:
-                                con.execute(SQL_INSERT_SPECIESCOUNTRIES, (all_species[i][0], country, a.area))
+                                con.execute(SQL_INSERT_SPECIESCOUNTRIES, (all_species[i][0], country, (a.area/c.area)))
+
 
 
     log.print_message(" Loading GeoJSON Species Completed. ")

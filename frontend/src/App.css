@@ -1,0 +1,217 @@
+:root {
+  --green: rgb(1, 146, 103);
+  --teal: rgb(0, 200, 151);
+  --yellow: rgb(255, 211, 101);
+  --nature: rgb(253, 255, 169);
+}
+
+@font-face {
+  font-family: 'RadioCanada';
+  src: local('RadioCanada'), url('./fonts/RadioCanada-VariableFont_wdth,wght.ttf') format('truetype');
+}
+
+.App {
+  text-align: center;
+}
+
+/*
+Year slider
+legend/key
+dropdown taxonomy
+download/export button
+*/
+
+body {
+  font-family: 'RadioCanada'!important;
+  border-top: 7px solid var(--green);
+}
+
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: calc(10px + 1vmin);
+}
+
+/* Radio button styling */
+label {
+  display:block;
+}
+
+/* Other app styling */
+
+.col-sm{
+  display:inline-block;
+  width: 55%;
+}
+.col-leg{
+  display:inline-block;
+  width: 20%;
+}
+select#selectButton{
+  display:inline-block;
+  width: 20%;
+}
+/* #clear {
+    clear: both;
+} */
+
+input[type='radio']:after {
+    width: 15px;
+    height: 15px;
+    border-radius: 15px;
+    top: -2px;
+    left: -1px;
+    position: relative;
+    background-color: #d1d3d1;
+    content: '';
+    display: inline-block;
+    visibility: visible;
+    border: 2px solid white;
+}
+.dropdown-menu-color {
+    color: var(--green);
+}
+.rs-picker-has-value .rs-btn .rs-picker-toggle-value, .rs-picker-has-value .rs-picker-toggle .rs-picker-toggle-value {
+    color: var(--green);
+}
+input[type='radio']:checked:after {
+    width: 15px;
+    height: 15px;
+    border-radius: 15px;
+    top: -2px;
+    left: -1px;
+    position: relative;
+    background-color: rgb(1, 146, 103);
+    content: '';
+    display: inline-block;
+    visibility: visible;
+    border: 2px solid white;
+}
+div.slider-colors .rs-slider-progress-bar{
+  background-color: rgb(1, 146, 103);
+  border: rgb(1, 146, 103);
+}
+.slider-handle-colors.rs-slider-handle:before{
+  background-color: #fff;
+  border: 2px solid rgb(1, 146, 103);
+
+}
+.controls-container, .main-container {
+  display: flex;
+  justify-content: center;
+  margin: 10px;
+  gap: 10px;
+}
+
+.container {
+  /* background-color: #fafcff; */
+  border-radius: 10px;
+  /* border: 1px solid #e1e1e1; */
+  background: #fff;
+  -webkit-box-shadow: 0 1px 2px 0 rgb(34 36 38 / 15%);
+  box-shadow: 0 1px 2px 0 rgb(34 36 38 / 15%);
+  margin: 1rem 0;
+  padding: 1em 1em;
+  border: 1px solid rgba(34,36,38,.15);
+}
+
+.container#controls {
+  gap: 40px;
+  align-items: baseline;
+}
+
+.map-container {
+  display: inline-block;
+	position: relative;
+	width: 100%;
+	padding-bottom: 50%;
+	vertical-align: middle;
+	/*overflow: hidden;*/
+}
+
+.map-canvas {
+  display: inline-block;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+div#controls {
+  flex: 2 1 auto;
+  display: flex;
+}
+
+div#options{
+  /* display:inline-block; */
+/* width: 18%; */
+/* border:2px solid #000; */
+/* overflow-y: auto;
+height: 100px; */
+}
+
+div#slider{
+  flex: 2 1 auto;
+  /* float:left; */
+  /* display:inline-block; */
+/* width: 30%; */
+/* border:2px solid #000; */
+/* overflow-y: auto;
+height: 100px; */
+}
+div#key{
+  /* float:left; */
+  display:inline-block;
+/* width: 20%; */
+/* border:2px solid #000; */
+/* overflow-y: auto;
+height: 100px; */
+}
+div#dropdown{
+  /* float:left; */
+  display:inline-block;
+/* width: 24%; */
+/* border:2px solid #000; */
+/* overflow-y: auto;
+height: 100px; */
+}
+div#download{
+  /* float:left; */
+  display:inline-block;
+/* width: 5%; */
+/* border:2px solid #000; */
+overflow-y: auto;
+/* height: 100px; */
+align-self: center;
+}
+
+
+
+div#halfpage{
+  /* float:left; */
+  /* display:inline-block; */
+/* width: 24%; */
+/* border:2px solid #000; */
+ overflow-y: auto;
+ height: 500px;
+}
+
+div#worldmap{
+  flex: 2 1 auto;
+  display: flex;
+  justify-content: center;
+  /* float:left; */
+  /* display:inline-block; */
+/* width: 75%; */
+/* border:2px solid #000; */
+overflow-y: auto;
+overflow-x: auto;
+height: 500px;
+}
+
+
+svg#sky {
+  width: 100%;
+  border:1px dotted #ccc;
+  background-color: #ccc;
+}
