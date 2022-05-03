@@ -30,6 +30,8 @@ def get_endemic_species(y1, y2):
              BY SpeciesName HAVING COUNT(*) = 1) WHERE CountriesName =\'%s\'
              AND SPECIESNAME in (SELECT name from Species WHERE year <= %d and year >= %d)"""%(country[0].upper(), int(y2), int(y1))).fetchall()
             lengths.append(len(countries_out[country[0]]))
+        lengths = list(set(lengths))
+        lengths.remove(0)
         data["countries"] = countries_out
         data["min"] = min(lengths)
         data["max"] = max(lengths)
@@ -73,7 +75,10 @@ def countries():
             countries_out[country[0]] = species
             lengths.append(len(species))
             sums.append(sum([s[1] for s in species]))
-
+        sums = list(set(sums))
+        sums.remove(0)
+        lengths = list(set(lengths))
+        lengths.remove(0)
         data["countries"] = countries_out
         if c == 'Species Counts':
             data["min"] = min(lengths)
@@ -119,7 +124,7 @@ def taxas():
     with con:
         taxas = con.execute('SELECT taxa from Species').fetchall()
         for taxa in taxas:
-            taxa = re.split(r'(?<!\(),(?![\w\s]*[\)])',taxa[0].strip())
+            taxa = re.split(r'(?<!\(),(?![\w\s]*[\)])|;',taxa[0].strip())
             full_taxa_list.extend(taxa)
     full_taxa_list = list(set(full_taxa_list))
     full_taxa_list.append("All Taxas")

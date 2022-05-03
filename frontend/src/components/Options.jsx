@@ -12,6 +12,7 @@ export default function Options(props) {
   };
 
   const radioRows = opts.map((opt) => (
+
     <label htmlFor="mapMetric">
       <input
         type="radio"
@@ -24,5 +25,9 @@ export default function Options(props) {
     </label>
   ));
 
-  return radioRows;
+  return (
+    <>
+    <h4> Data Type </h4>
+    {radioRows}
+   </>);
 }

@@ -9,11 +9,9 @@ export const useTaxa = function () {
   });
   // only fetch map data once and create a tooltip
   useEffect(() => {
-    console.log("here")
 
     d3.json("http://localhost:5000/data/taxas")
       .then((data) => {
-        console.log(data)
         setTaxaData((prevState) => {
 
           return { ...prevState, data: data, loading: false };

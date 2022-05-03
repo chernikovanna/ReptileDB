@@ -13,14 +13,19 @@ export default function Select(props) {
       return(t);
 
     });
-    console.log(data)
 
     return (
+      <>
+      <h4> Taxa </h4>
       <SelectPicker
-      cleanable={(false)}
+      cleanable={false}
       data={data}
       defaultValue="All Taxas"
-      onChange ={handleChange}/>
+      onChange ={handleChange}
+      placement="bottomEnd"
+      disabled={false}
+      />
+      </>
     );
   }
 }

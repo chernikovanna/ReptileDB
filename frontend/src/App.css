@@ -56,7 +56,47 @@ select#selectButton{
     clear: both;
 } */
 
+input[type='radio']:after {
+    width: 15px;
+    height: 15px;
+    border-radius: 15px;
+    top: -2px;
+    left: -1px;
+    position: relative;
+    background-color: #d1d3d1;
+    content: '';
+    display: inline-block;
+    visibility: visible;
+    border: 2px solid white;
+}
+.dropdown-menu-color {
+    color: var(--green);
+}
+.rs-picker-has-value .rs-btn .rs-picker-toggle-value, .rs-picker-has-value .rs-picker-toggle .rs-picker-toggle-value {
+    color: var(--green);
+}
+input[type='radio']:checked:after {
+    width: 15px;
+    height: 15px;
+    border-radius: 15px;
+    top: -2px;
+    left: -1px;
+    position: relative;
+    background-color: rgb(1, 146, 103);
+    content: '';
+    display: inline-block;
+    visibility: visible;
+    border: 2px solid white;
+}
+div.slider-colors .rs-slider-progress-bar{
+  background-color: rgb(1, 146, 103);
+  border: rgb(1, 146, 103);
+}
+.slider-handle-colors.rs-slider-handle:before{
+  background-color: #fff;
+  border: 2px solid rgb(1, 146, 103);
 
+}
 .controls-container, .main-container {
   display: flex;
   justify-content: center;
@@ -76,13 +116,18 @@ select#selectButton{
   border: 1px solid rgba(34,36,38,.15);
 }
 
+.container#controls {
+  gap: 40px;
+  align-items: baseline;
+}
+
 .map-container {
   display: inline-block;
 	position: relative;
 	width: 100%;
 	padding-bottom: 50%;
 	vertical-align: middle;
-	overflow: hidden;
+	/*overflow: hidden;*/
 }
 
 .map-canvas {
@@ -137,6 +182,7 @@ div#download{
 /* border:2px solid #000; */
 overflow-y: auto;
 /* height: 100px; */
+align-self: center;
 }
 
 
@@ -147,7 +193,7 @@ div#halfpage{
 /* width: 24%; */
 /* border:2px solid #000; */
  overflow-y: auto;
- height: 500px; 
+ height: 500px;
 }
 
 div#worldmap{

@@ -24,7 +24,7 @@ export default function Country(props) {
       onMouseMove={(event) => {
         handleMouseMove(event);
       }}
-      onClick={() => {setSpeciesList(props.data);}}
+      onClick={() => {setSpeciesList(props.data, tooltipData);}}
     />
   );
 }
