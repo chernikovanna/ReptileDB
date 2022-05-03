@@ -41,14 +41,14 @@ export default function Key(props) {
     return (
       <>
       <h4>{selectType}</h4>
-      <svg width="160" height="75">
+      <svg width="200" height="50">
       {square}
       {texts}
       </svg>
       </>
     );
   } else{
-    return (<svg width="160" height="50"></svg>);
+    return (<svg width="200" height="50"></svg>);
   }
 
 }

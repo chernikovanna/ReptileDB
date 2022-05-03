@@ -22,7 +22,7 @@ download/export button
 */
 
 body {
-  font-family: 'RadioCanada';
+  font-family: 'RadioCanada'!important;
   border-top: 7px solid var(--green);
 }
 
